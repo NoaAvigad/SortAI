@@ -1,5 +1,7 @@
 package com.projects.dubhacks.sortai;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -41,13 +43,13 @@ import rx.schedulers.Schedulers;
 
 public class SortAI extends AppCompatActivity {
 
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-
     static final String MODEL_ID = "b38d23d52ed745209254769074dd980f";
 
-    String mCurrentPhotoPath;
+    private static Bitmap photo = null;
 
-    static final int REQUEST_TAKE_PHOTO = 1;
+    private byte[] image;
+
+    private int PICK_FROM_CAMERA = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,21 +101,37 @@ public class SortAI extends AppCompatActivity {
 //    }
 
     private void dispatchTakePictureIntent() {
-        //camera stuff
-        Intent imageIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 
-//folder stuff
-        File imagesFolder = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        imagesFolder.mkdirs();
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        File image = new File(imagesFolder, "QR_" + timeStamp + ".png");
-        Uri uriSavedImage = Uri.fromFile(image);
-        System.out.println(image.getAbsolutePath());
-        mCurrentPhotoPath = image.getAbsolutePath();
+        try {
+            intent.putExtra("return-data", true);
+            startActivityForResult(intent, PICK_FROM_CAMERA);
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
+        }
 
-        imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
-        startActivityForResult(imageIntent, REQUEST_IMAGE_CAPTURE);
+
+
+//        //camera stuff
+//        Intent imageIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//
+////folder stuff
+//        File imagesFolder = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+//        imagesFolder.mkdirs();
+//
+//        File image = new File(imagesFolder, "QR_" + timeStamp + ".png");
+//        Uri uriSavedImage = Uri.fromFile(image);
+//        System.out.println(image.getAbsolutePath());
+//        mCurrentPhotoPath = image.getAbsolutePath();
+//
+//        imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
+//        startActivityForResult(imageIntent, REQUEST_IMAGE_CAPTURE);
+
+
+
+
 
 //        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 //
@@ -139,70 +157,89 @@ public class SortAI extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        if (resultCode != Activity.RESULT_OK) return;
+        else {
 
-            Bitmap imageBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
-//
-//
-//            Bundle extras = data.getExtras();
-//            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            Bundle extras = data.getExtras();
 
-            try {
-                ExifInterface ei = new ExifInterface(mCurrentPhotoPath);
-                int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-                        ExifInterface.ORIENTATION_UNDEFINED);
+            if (extras != null) {
+                ImageView mImageView = (ImageView) findViewById(R.id.picture_saving);
+                photo = extras.getParcelable("data");
+                mImageView.setImageBitmap(photo);
 
-                switch(orientation) {
-                    case ExifInterface.ORIENTATION_ROTATE_90:
-                        imageBitmap = rotateImage(imageBitmap, 90);
-                        break;
-                    case ExifInterface.ORIENTATION_ROTATE_180:
-                        imageBitmap = rotateImage(imageBitmap, 180);
-                        break;
-                    case ExifInterface.ORIENTATION_ROTATE_270:
-                        imageBitmap = rotateImage(imageBitmap, 270);
-                        break;
-                    case ExifInterface.ORIENTATION_NORMAL:
-                    default:
-                        break;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                photo.compress(Bitmap.CompressFormat.PNG, 100, bos);
+                image = bos.toByteArray();
+
+
+                // Client interaction
+                Client client = new Client();
+                client.predictWithModel(ClarifaiInput.forImage(ClarifaiImage.of(image)), MODEL_ID)
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<String>() {
+                            @Override
+                            public void onCompleted() {
+
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                Toast.makeText(SortAI.this, "Sorry you suck", Toast.LENGTH_LONG).show();
+                                System.out.println(e.getMessage() + " Message -------------------->  HERE");
+                            }
+
+                            @Override
+                            public void onNext(String sortOutput) {
+                                Toast.makeText(SortAI.this, sortOutput, Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+
             }
 
-
-            ImageView mImageView = (ImageView) findViewById(R.id.picture_saving);
-            mImageView.setImageBitmap(imageBitmap);
-
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-            byte[] byteArray = stream.toByteArray();
-
-            // Client interaction
-            Client client = new Client();
-            client.predictWithModel(ClarifaiInput.forImage(ClarifaiImage.of(byteArray)), MODEL_ID)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Subscriber<String>() {
-                        @Override
-                        public void onCompleted() {
-
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Toast.makeText(SortAI.this, "Sorry you suck", Toast.LENGTH_LONG).show();
-                            System.out.println(e.getMessage() + " Message -------------------->  HERE");
-                        }
-
-                        @Override
-                        public void onNext(String sortOutput) {
-                            Toast.makeText(SortAI.this, sortOutput, Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-
         }
+
+//        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+//
+//            Bitmap imageBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
+////
+////
+////            Bundle extras = data.getExtras();
+////            Bitmap imageBitmap = (Bitmap) extras.get("data");
+//
+//            try {
+//                ExifInterface ei = new ExifInterface(mCurrentPhotoPath);
+//                int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+//                        ExifInterface.ORIENTATION_UNDEFINED);
+//
+//                switch(orientation) {
+//                    case ExifInterface.ORIENTATION_ROTATE_90:
+//                        imageBitmap = rotateImage(imageBitmap, 90);
+//                        break;
+//                    case ExifInterface.ORIENTATION_ROTATE_180:
+//                        imageBitmap = rotateImage(imageBitmap, 180);
+//                        break;
+//                    case ExifInterface.ORIENTATION_ROTATE_270:
+//                        imageBitmap = rotateImage(imageBitmap, 270);
+//                        break;
+//                    case ExifInterface.ORIENTATION_NORMAL:
+//                    default:
+//                        break;
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//
+//            ImageView mImageView = (ImageView) findViewById(R.id.picture_saving);
+//            mImageView.setImageBitmap(imageBitmap);
+//
+//            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+//            byte[] byteArray = stream.toByteArray();
+
+
     }
 
     public static Bitmap rotateImage(Bitmap source, float angle) {
