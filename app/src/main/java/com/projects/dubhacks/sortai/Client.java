@@ -58,6 +58,9 @@ public class Client {
                         subscriber.onNext(response.get());
                         subscriber.onCompleted();
                     }else{
+                        System.out.println("-----------  START  ---------------");
+                        System.out.println(response.getStatus());
+                        System.out.println("CODE: " +response.responseCode());
                         subscriber.onError(new Exception());
                     }
 

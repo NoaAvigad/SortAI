@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import clarifai2.dto.input.ClarifaiInput;
@@ -78,9 +79,17 @@ public class SortAI extends AppCompatActivity {
             ImageView mImageView = (ImageView) findViewById(R.id.picture_saving);
             mImageView.setImageBitmap(imageBitmap);
 
+            // converting bitmap to byte []
+            int bytes = imageBitmap.getByteCount();
+
+            ByteBuffer buffer = ByteBuffer.allocate(bytes); //Create a new buffer
+            imageBitmap.copyPixelsToBuffer(buffer); //Move the byte data to the buffer
+
+            byte[] array = buffer.array(); //Get the underlying array containing the data.
+
             // Client interaction
             Client client = new Client();
-            client.predictWithGeneralModel(ClarifaiInput.forImage(ClarifaiImage.of("https://samples.clarifai.com/metro-north.jpg")))
+            client.predictWithGeneralModel(ClarifaiInput.forImage(ClarifaiImage.of(array)))
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Subscriber<List<ClarifaiOutput<Concept>>>() {
@@ -92,6 +101,7 @@ public class SortAI extends AppCompatActivity {
                         @Override
                         public void onError(Throwable e) {
                             Toast.makeText(SortAI.this, "Sorry you suck", Toast.LENGTH_LONG).show();
+                            System.out.println(e.getMessage() + " Message -------------------->  HERE");
                         }
 
                         @Override
@@ -104,7 +114,6 @@ public class SortAI extends AppCompatActivity {
                             }
                             Toast.makeText(SortAI.this, concepts.get(0).name(), Toast.LENGTH_LONG).show();
                         }
-
                     });
         }
     }
