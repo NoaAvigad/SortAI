@@ -15,11 +15,4 @@ you're welcome :P
 
 
 
-Made by ppnia & aeryuus & jeaniewu & soohyunkim & NoaAvigad
-
-
-https://github.com/NoaAvigad
-https://github.com/soohyunkim
-https://github.com/jeaniewu
-https://github.com/aeryuus
-https://github.com/ppnia
+Made with <3 by [ppnia](https://github.com/ppnia) & [aeryuus](https://github.com/aeryuus) & [jeaniewu](https://github.com/jeaniewu) & [soohyunkim](https://github.com/soohyunkim) & [Noa Avigad](http://www.github.com/NoaAvigad)
