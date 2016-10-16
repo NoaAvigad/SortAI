@@ -32,6 +32,8 @@ public class SortAI extends AppCompatActivity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
+    static final String MODEL_ID = "b38d23d52ed745209254769074dd980f";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,10 +91,10 @@ public class SortAI extends AppCompatActivity {
 
             // Client interaction
             Client client = new Client();
-            client.predictWithGeneralModel(ClarifaiInput.forImage(ClarifaiImage.of(array)))
+            client.predictWithModel(ClarifaiInput.forImage(ClarifaiImage.of("http://sites.psu.edu/siowfa15/wp-content/uploads/sites/29639/2015/09/04_Apples.jpg")), MODEL_ID)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Subscriber<List<ClarifaiOutput<Concept>>>() {
+                    .subscribe(new Subscriber<String>() {
                         @Override
                         public void onCompleted() {
 
@@ -105,16 +107,12 @@ public class SortAI extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onNext(List<ClarifaiOutput<Concept>> clarifaiOutputs) {
-                            List<Concept> concepts = clarifaiOutputs.get(0).data();
-                            for (Concept c : concepts) {
-                                System.out.println("Concept Id:" + c.id());
-                                System.out.println("Classes:" + c.name());
-                                System.out.println("Probs" + c.value());
-                            }
-                            Toast.makeText(SortAI.this, concepts.get(0).name(), Toast.LENGTH_LONG).show();
+                        public void onNext(String sortOutput) {
+                            Toast.makeText(SortAI.this, sortOutput, Toast.LENGTH_LONG).show();
                         }
                     });
+
+
         }
     }
 }
