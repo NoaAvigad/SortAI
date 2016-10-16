@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -81,17 +82,13 @@ public class SortAI extends AppCompatActivity {
             ImageView mImageView = (ImageView) findViewById(R.id.picture_saving);
             mImageView.setImageBitmap(imageBitmap);
 
-            // converting bitmap to byte []
-            int bytes = imageBitmap.getByteCount();
-
-            ByteBuffer buffer = ByteBuffer.allocate(bytes); //Create a new buffer
-            imageBitmap.copyPixelsToBuffer(buffer); //Move the byte data to the buffer
-
-            byte[] array = buffer.array(); //Get the underlying array containing the data.
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
 
             // Client interaction
             Client client = new Client();
-            client.predictWithModel(ClarifaiInput.forImage(ClarifaiImage.of("http://sites.psu.edu/siowfa15/wp-content/uploads/sites/29639/2015/09/04_Apples.jpg")), MODEL_ID)
+            client.predictWithModel(ClarifaiInput.forImage(ClarifaiImage.of(byteArray)), MODEL_ID)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Subscriber<String>() {
