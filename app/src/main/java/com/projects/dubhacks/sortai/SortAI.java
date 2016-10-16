@@ -1,9 +1,11 @@
 package com.projects.dubhacks.sortai;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -22,7 +24,9 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.view.Menu;
@@ -67,7 +71,7 @@ public class SortAI extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // calling the camera app
-         this.dispatchTakePictureIntent();
+        dispatchTakePictureIntent();
     }
 
     @Override
@@ -180,7 +184,6 @@ public class SortAI extends AppCompatActivity {
                 photo.compress(Bitmap.CompressFormat.PNG, 100, bos);
                 image = bos.toByteArray();
 
-
                 // Client interaction
                 Client client = new Client();
                 client.predictWithModel(ClarifaiInput.forImage(ClarifaiImage.of(image)), MODEL_ID)
@@ -191,74 +194,64 @@ public class SortAI extends AppCompatActivity {
                             public void onCompleted() {
 
 
-                        }
+                            }
                             @Override
                             public void onError(Throwable e) {
                                 Toast.makeText(SortAI.this, "Sorry you suck", Toast.LENGTH_LONG).show();
                                 System.out.println(e.getMessage() + " Message -------------------->  HERE");
                             }
 
+                            @Override
+                            public void onNext(String sortOutput) {
 
+                                Drawable drawable;
+                                Resources r = getApplicationContext().getResources();
+                                switch(sortOutput) {
+                                    case "compost":
+                                        drawable = r.getDrawable(R.drawable.compost_popup);
+                                        break;
+                                    case "recyclable-paper":
+                                        drawable = r.getDrawable(R.drawable.mixedpaper_popup);
+                                        break;
+                                    case "containers":
+                                        drawable = r.getDrawable(R.drawable.recycling_popup);
+                                        break;
+                                    case "garbage":
+                                        drawable = r.getDrawable(R.drawable.garbage_popup);
+                                        break;
+                                    default:
+                                        drawable = r.getDrawable(R.drawable.error_popup);
+                                        break;
+                                }
 
+                                loadPhoto(drawable);
 
-                        @Override
-                        public void onNext(String sortOutput) {
-
-                            Drawable drawable;
-                            Resources r = getApplicationContext().getResources();
-                            switch(sortOutput) {
-                                        case "compost":
-                                            drawable = r.getDrawable(R.drawable.compost_popup);
-                                            break;
-                                        case "recyclable-paper":
-                                            drawable = r.getDrawable(R.drawable.mixedpaper_popup);
-                                            break;
-                                        case "containers":
-                                            drawable = r.getDrawable(R.drawable.recycling_popup);
-                                            break;
-                                        case "garbage":
-                                            drawable = r.getDrawable(R.drawable.garbage_popup);
-                                            break;
-                                        default:
-                                            drawable = r.getDrawable(R.drawable.error);
-                                            break;
-                                    }
-
-                            Dialog dialog = new Dialog(getApplicationContext());
-                            dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-
-                            dialog.setContentView(getLayoutInflater().inflate(R.layout.activity_sort_ai, null)); //todo
-
-                            ImageView imageView = (ImageView) findViewById(R.id.picture_saving);
-                            imageView.setBackground(drawable);
-
-//                            RelativeLayout relativeLayout = (RelativeLayout) dialog.findViewById(R.id.);
-//                            relativeLayout.setBackground(drawable);
-
-
-//                            PopupWindow popUpWindow = new PopupWindow(getApplicationContext());
-//                            LinearLayout mainLayout = new LinearLayout(getApplicationContext());
-//                            popUpWindow.showAtLocation(mainLayout, Gravity.BOTTOM, 10, 10);
-//                            popUpWindow.update(50, 50, 320, 90);
-//
-//
-//                            View child = getLayoutInflater().inflate(R.layout.compost_popup, null);
-//                            mainLayout.addView(child);
-
-
-//                            Toast.makeText(SortAI.this, sortOutput, Toast.LENGTH_LONG).show();
-
-
-
-
-                        }
-
-                    });
+                            }
+                        });
             }
-
         }
-
-
     }
 
+    private void loadPhoto(Drawable imageView) {
+
+        //ImageView tempImageView = imageView;
+
+        final AlertDialog.Builder imageDialog = new AlertDialog.Builder(this);
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
+
+        View layout = inflater.inflate(R.layout.custom_fullimage_dialog,
+                (ViewGroup) findViewById(R.id.layout_root));
+        ImageView image = (ImageView) layout.findViewById(R.id.fullimage);
+        image.setImageDrawable(imageView);
+        imageDialog.setView(layout);
+        final AlertDialog alertDialog = imageDialog.create();
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.cancel();
+                dispatchTakePictureIntent();
+            }
+        });
+        alertDialog.show();
+    }
 }

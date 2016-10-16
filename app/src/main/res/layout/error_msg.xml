@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="600px"
     android:layout_height="600px"
-    android:background="@drawable/error"
+    android:background="@drawable/error_popup"
     android:layout_gravity="center"
     >
 
