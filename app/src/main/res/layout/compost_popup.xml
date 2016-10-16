@@ -3,6 +3,7 @@
     android:layout_width="600px"
     android:layout_height="600px"
     android:background="@drawable/compost_popup"
+    android:id="@+id/popupimg"
     android:layout_gravity="center"
     >
 
