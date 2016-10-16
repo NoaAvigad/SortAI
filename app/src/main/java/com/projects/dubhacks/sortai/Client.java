@@ -57,18 +57,23 @@ public class Client {
                     // TODO: handle unsuccesful response
                     if (response.isSuccessful()) {
                         List<Concept> concepts = response.get().get(0).data();
+                        StringBuilder builder = new StringBuilder();
                         String sort = "";
-                        Float maxProbability = 0.6f;
+                        Float maxProbability = 0.4f;
                         for (Concept c : concepts) {
                             if (c.value() > maxProbability){
                                 sort = c.name();
                             }
+                            builder.append("Concept Id:" + c.id() +"\n");
+                            builder.append("Classes" + c.name() +"\n");
+                            builder.append("Probs" + c.value() +"\n");
                             System.out.println("Concept Id:" + c.id());
                             System.out.println("Classes:" + c.name());
                             System.out.println("Probs" + c.value());
                         }
                         System.out.println("THIS GARBAGE IS " + sort);
-                        subscriber.onNext(sort);
+                        builder.append("THIS GARBAGE IS " + sort +"\n");
+                        subscriber.onNext(builder.toString());
                         subscriber.onCompleted();
                     }else{
                         System.out.println("-----------  START  ---------------");
