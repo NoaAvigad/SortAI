@@ -15,7 +15,7 @@ you're welcome :P
 
 
 
-Made by @ppnia & @aeryuus & @jeaniewu & @soohyunkim & @NoaAvigad
+Made by ppnia & aeryuus & jeaniewu & soohyunkim & NoaAvigad
 
 
 https://github.com/NoaAvigad
