@@ -87,6 +87,8 @@ public class SortAI extends AppCompatActivity {
             byte[] byteArray = stream.toByteArray();
 
             // Client interaction
+
+
             Client client = new Client();
             client.predictWithModel(ClarifaiInput.forImage(ClarifaiImage.of(byteArray)), MODEL_ID)
                     .subscribeOn(Schedulers.newThread())
@@ -106,7 +108,26 @@ public class SortAI extends AppCompatActivity {
                         @Override
                         public void onNext(String sortOutput) {
                             Toast.makeText(SortAI.this, sortOutput, Toast.LENGTH_LONG).show();
+
+                                    switch(sortOutput) {
+                                        case "compost":
+                                            setContentView(R.layout.compost_popup);
+                                            break;
+                                        case "recyclable-paper":
+                                            setContentView(R.layout.mixedpaper_popup);
+                                            break;
+                                        case "containers":
+                                            setContentView(R.layout.recycling_popup);
+                                            break;
+                                        case "garbage":
+                                            setContentView(R.layout.garbage_popup);
+                                            break;
+                                        default:
+                                            setContentView(R.layout.error_msg);
+                                            break;
+                                    }
                         }
+
                     });
 
 
