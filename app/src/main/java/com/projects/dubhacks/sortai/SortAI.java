@@ -2,6 +2,7 @@ package com.projects.dubhacks.sortai;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
@@ -23,18 +24,8 @@ public class SortAI extends AppCompatActivity {
         setContentView(R.layout.activity_sort_ai);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         // calling the camera app
-        this.dispatchTakePictureIntent();
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
+         this.dispatchTakePictureIntent();
     }
 
     @Override
@@ -71,7 +62,7 @@ public class SortAI extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            ImageView mImageView = new ImageView(this.getApplicationContext());
+            ImageView mImageView = (ImageView) findViewById(R.id.picture_saving);
             mImageView.setImageBitmap(imageBitmap);
         }
     }
