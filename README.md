@@ -15,4 +15,4 @@ you're welcome :P
 
 
 
-Made with <3 by [ppnia](https://github.com/ppnia) & [aeryuus](https://github.com/aeryuus) & [jeaniewu](https://github.com/jeaniewu) & [soohyunkim](https://github.com/soohyunkim) & [Noa Avigad](http://www.github.com/NoaAvigad)
+Made with <3 by [Pinia Chandra](https://github.com/ppnia) & [Kristen Kwong](https://github.com/aeryuus) & [Jeanie Suparman](https://github.com/jeaniewu) & [Soo Kim](https://github.com/soohyunkim) & [Noa Avigad](http://www.github.com/NoaAvigad)
